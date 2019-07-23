@@ -1,0 +1,32 @@
+@mixin demo-mixin {
+  color: purple;
+  text-decoration: line-through;
+  font: {
+    size: 17px;
+    weight: 600;
+  }
+}
+$demo-color1: yellow!default;
+$demo-color2: pink;
+$demo-size: 12px;
+.demo {
+  font-size: $demo-size;
+  h1 {
+    color: $demo-color1;
+    transition: all 0.5s;
+    &:hover {
+      font-size: 24px;
+    }
+  }
+  > span {
+    color: $demo-color2;
+  }
+  p {
+    .sub1, .sub2, .sub3 {
+      font-size: 20px;
+    }
+  }
+  .mixin {
+    @include demo-mixin;
+  }
+}

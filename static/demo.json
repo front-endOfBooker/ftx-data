@@ -1,0 +1,25 @@
+{
+  "code": 200,
+  "data": [
+    {
+      "name": "fox",
+      "team": "king",
+      "data": [
+        {"score": 20, "rebound": 5, "assist": 8, "steal": 2, "block": 1},
+        {"score": 21, "rebound": 5, "assist": 8, "steal": 2, "block": 1},
+        {"score": 23, "rebound": 5, "assist": 8, "steal": 2, "block": 1},
+        {"score": 26, "rebound": 5, "assist": 8, "steal": 2, "block": 1}
+      ]
+    },
+    {
+      "name": "booker",
+      "team": "suns",
+      "data": [
+        {"score": 30, "rebound": 6, "assist": 6, "steal": 2, "block": 1},
+        {"score": 31, "rebound": 6, "assist": 6, "steal": 2, "block": 1},
+        {"score": 33, "rebound": 6, "assist": 6, "steal": 2, "block": 1},
+        {"score": 36, "rebound": 6, "assist": 6, "steal": 2, "block": 1}
+      ]
+    }
+  ]
+}
