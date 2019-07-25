@@ -32,25 +32,34 @@
         :formatter="formatter">
       </el-table-column>
     </el-table>
+
+    <el-input
+      type="textarea"
+      :rows="2"
+      placeholder="请输入内容"
+      v-model="text">
+    </el-input>
+    <el-button @click="submitText">提交</el-button>
+    <el-button @click="getText">获取</el-button>
   </div>
 </template>
 
 <script>
   import {Api} from '../../api/Api'
+  import axios from 'axios'
   export default {
     data () {
       return {
-        tableData: []
+        tableData: [],
+        text: ''
       }
     },
     mounted () {
-      // axios.get('/static/demo.json').then(res => {
-      //   console.log("this's demo.json: " + res)
-      // })
-      Api('demo.json', res => {
-        console.log(res)
-        this.tableData = res
-      }, err => {})
+      
+      // Api('demo.json', res => {
+      //   console.log(res)
+      //   this.tableData = res
+      // }, err => {})
     },
     methods: {
       formatter(row, column) {
@@ -61,6 +70,18 @@
         }
         averageScore = averageScore/row.data.length
         return averageScore;
+      },
+      submitText() {
+        axios.post('http://localhost:3000/', {
+          item: this.text
+        }).then(res => {
+          this.text = ''
+        })
+      },
+      getText(){
+        axios.get('http://localhost:3000/').then(res => {
+          
+        })
       }
     }
   }
