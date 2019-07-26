@@ -63,8 +63,6 @@ http.createServer((req, res) => {
       })
 
       req.on('end', () => {
-        // item = JSON.parse(item)
-        console.log(item)
         fs.appendFile('./demo.txt', item, 'utf-8', err => {
           if (err) {
             throw err
@@ -85,8 +83,12 @@ http.createServer((req, res) => {
         demo += chunk
       })
       read.on('end', () => {
-        demo = JSON.stringify([demo])
-        res.write(demo)
+        demo = demo.replace(/}(?={)/g, '},').split(',')
+        console.log(demo)
+        demo = demo.map(item => {
+          return JSON.parse(item)
+        })
+        res.write(JSON.stringify(demo))
         res.end()
       })
   }

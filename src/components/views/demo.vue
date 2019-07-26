@@ -1,6 +1,6 @@
 <template>
   <div class="demo">
-    <el-table
+    <!-- <el-table
       :data="tableData"
       style="width: 100%"
       :default-sort = "{prop: 'date', order: 'descending'}"
@@ -31,7 +31,7 @@
         sortable
         :formatter="formatter">
       </el-table-column>
-    </el-table>
+    </el-table> -->
 
     <el-input
       type="textarea"
@@ -41,6 +41,13 @@
     </el-input>
     <el-button @click="submitText">提交</el-button>
     <el-button @click="getText">获取</el-button>
+
+    <el-tag
+      v-for="tag in tags"
+      :key="tag.name"
+      closable>
+      {{tag.name}}
+    </el-tag>
   </div>
 </template>
 
@@ -51,7 +58,8 @@
     data () {
       return {
         tableData: [],
-        text: ''
+        text: '',
+        tags: []
       }
     },
     mounted () {
@@ -73,15 +81,19 @@
       },
       submitText() {
         axios.post('http://localhost:3000/', {
-          item: this.text
+          name: this.text
         }).then(res => {
           this.text = ''
         })
       },
       getText(){
         axios.get('http://localhost:3000/').then(res => {
-          
+          this.tags = res.data
+          console.log(this.tags)
         })
+      },
+      handleClose(){
+
       }
     }
   }
