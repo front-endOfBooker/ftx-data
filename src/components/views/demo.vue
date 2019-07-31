@@ -43,8 +43,9 @@
     <el-button @click="getText">获取</el-button>
 
     <el-tag
-      v-for="tag in tags"
-      :key="tag.name"
+      v-for="(tag, index) in tags"
+      :key="tag.id"
+      @close="handleClose(index)"
       closable>
       {{tag.name}}
     </el-tag>
@@ -54,6 +55,7 @@
 <script>
   import {Api} from '../../api/Api'
   import axios from 'axios'
+  const qs = require('qs')
   export default {
     data () {
       return {
@@ -63,11 +65,7 @@
       }
     },
     mounted () {
-      
-      // Api('demo.json', res => {
-      //   console.log(res)
-      //   this.tableData = res
-      // }, err => {})
+      this.getText()
     },
     methods: {
       formatter(row, column) {
@@ -80,10 +78,14 @@
         return averageScore;
       },
       submitText() {
-        axios.post('http://localhost:3000/', {
-          name: this.text
-        }).then(res => {
-          this.text = ''
+        axios.post('http://localhost:3000/add', qs.stringify({
+          name: this.text,
+          id: this.createId(this.tags)
+        })).then(res => {
+          if (res.data.code == 200) {
+            this.text = ''
+            this.getText()
+          }
         })
       },
       getText(){
@@ -92,9 +94,34 @@
           console.log(this.tags)
         })
       },
-      handleClose(){
+      handleClose(index){
+        console.log(index)
+        axios.post('http://localhost:3000/delete', qs.stringify({
+          index,
+        })).then(res => {
+          if (res.data.code == 200) {
+            this.getText()
+          }
+        })
+      },
+      createId (list) {
+        let id = Math.ceil(Math.random()*100)
+        if (checkId(id, list)) {
+          return id
+        } else {
+          return createId(list)
+        }
 
-      }
+        function checkId (id, list) {
+          for (let i = 0; i < list.length; i++) {
+            if (id === list[i].id) {
+              return false
+            }
+          }
+          return true
+        }
+      },
+      
     }
   }
 </script>

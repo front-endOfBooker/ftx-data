@@ -1,5 +1,8 @@
 const fs = require('fs');
 const http = require('http');
+const qs = require('qs');
+
+let successCode = JSON.stringify({ code: 200 })
 
 // fs.writeFile('./demo.txt', '1222', err => {
 //   if (err) {
@@ -61,37 +64,79 @@ http.createServer((req, res) => {
       req.on('data', (chunk) => {
         item += chunk;
       })
-
-      req.on('end', () => {
-        fs.appendFile('./demo.txt', item, 'utf-8', err => {
-          if (err) {
-            throw err
-          }
+      if (req.url == '/add') {
+        req.on('end', () => {
+          fs.appendFile('./demo.txt', item+',', 'utf-8', err => {
+            if (err) {
+              throw err
+            }
+          })
+          res.write(successCode)
+          res.end()
         })
-        // items.push(item)
-        // let data = JSON.stringify(items)
-        res.write(JSON.stringify({
-          code: 200
-        }))
-        res.end()
-      })
+      } else if (req.url == '/delete') {
+        req.on('end', () => {
+          let index = qs.parse(item).index
+          readText().then(data => {
+            let textData = data.slice(0, data.length - 1).split(',').map(item => {
+              return qs.parse(item)
+            })
+            textData.splice(index, 1)
+            let _textData = ''
+            textData.forEach(item => {
+              return _textData += `name=` + item.name + '&id=' + item.id + ','
+            })
+            fs.writeFile('./demo.txt', _textData, 'utf-8', err => {
+              if (err) {
+                throw err
+              }
+            })
+          })
+          res.write(successCode)
+          res.end()
+          // fs.readFile('./demo.txt', 'utf-8', (err, data) => {
+          //   if (err) {
+          //     throw err
+          //   }
+          //   demo = demo.replace(/}(?={)/g, '},').split(',')
+          //   demo = demo.map(item => {
+          //     return JSON.parse(item)
+          //   })
+          //   demo.splice()
+          // })
+        })
+      }
       break;
     case 'GET':
       let read = fs.createReadStream('./demo.txt')
-      let demo = ''
+      let textData = ''
       read.on('data', (chunk) => {
-        demo += chunk
+        textData += chunk
       })
       read.on('end', () => {
-        demo = demo.replace(/}(?={)/g, '},').split(',')
-        console.log(demo)
-        demo = demo.map(item => {
-          return JSON.parse(item)
-        })
-        res.write(JSON.stringify(demo))
+        if (textData.length) {
+          textData = textData.slice(0, textData.length - 1).split(',').map(item => {
+            return qs.parse(item)
+          })
+        } else {
+          textData = []
+        }
+        res.write(JSON.stringify(textData))
         res.end()
       })
   }
 }).listen(3000, () => {
   console.log('server is starting')
 })
+
+function readText () {
+  return new Promise((resolve, reject) => {
+    fs.readFile('./demo.txt', 'utf-8', (err, data) => {
+      if (err) {
+        throw err
+      }
+      resolve(data)
+    })
+  })
+}
+
