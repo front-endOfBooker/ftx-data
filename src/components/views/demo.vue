@@ -1,13 +1,16 @@
 <template>
   <div class="demo">
-    <!-- <el-table
+    <el-col :span="2">
+      <el-button type="primary" size="mini" @click="playerVisible = true">添加</el-button>
+    </el-col>
+    <el-table
       :data="tableData"
       style="width: 100%"
       :default-sort = "{prop: 'date', order: 'descending'}"
       >
       <el-table-column
         type="expand"
-        width="180">
+        width="80">
         <template slot-scope="props">
           <el-form label-position="left" inline class="demo-table-expand">
             <el-form-item label="">
@@ -22,33 +25,74 @@
       </el-table-column>
       <el-table-column
         prop="team"
-        label="team"
-        width="180">
+        label="team">
       </el-table-column>
       <el-table-column
-        prop="data"
-        label="average"
-        sortable
-        :formatter="formatter">
+        label="sessions"
+        :formatter="formatterSession">
       </el-table-column>
-    </el-table> -->
+      <el-table-column label="average">
+        <el-table-column
+          label="score"
+          prop="data"
+          sortable
+          :formatter="formatterScore">
+        </el-table-column>
+        <el-table-column
+          label="rebound"
+          prop="data"
+          sortable
+          :formatter="formatterRebound">
+        </el-table-column>
+        <el-table-column
+          label="assist"
+          prop="data"
+          sortable
+          :formatter="formatterAssist">
+        </el-table-column>
+      </el-table-column>
+      <el-table-column
+        fixed="right"
+        label="操作"
+        width="100">
+        <template slot-scope="scope">
+          <el-button @click="handleClick(scope.row)" type="text" size="mini">add</el-button>
+          <el-button @click="deleteClick(scope.row)" type="text" size="mini">delete</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
 
-    <el-input
-      type="textarea"
-      :rows="2"
-      placeholder="请输入内容"
-      v-model="text">
-    </el-input>
-    <el-button @click="submitText">提交</el-button>
-    <el-button @click="getText">获取</el-button>
+    <el-dialog title="add player" :visible.sync="playerVisible">
+      <el-form :inline="true" :model="playData" class="demo-form-inline">
+        <el-form-item label="name">
+          <el-input v-model="playData.name" placeholder="name"></el-input>
+        </el-form-item>
+        <el-form-item label="team">
+          <el-input v-model="playData.team" placeholder="team"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="onSubmit">提交</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
 
-    <el-tag
-      v-for="(tag, index) in tags"
-      :key="tag.id"
-      @close="handleClose(index)"
-      closable>
-      {{tag.name}}
-    </el-tag>
+    <el-dialog title="add gameData" :visible.sync="gameVisible">
+      <el-form :inline="true" :model="gameDate" class="demo-form-inline">
+        <el-form-item label="score">
+          <el-input v-model="gameDate.score" placeholder="score"></el-input>
+        </el-form-item>
+        <el-form-item label="rebound">
+          <el-input v-model="gameDate.rebound" placeholder="rebound"></el-input>
+        </el-form-item>
+        <el-form-item label="assist">
+          <el-input v-model="gameDate.assist" placeholder="assist"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="onGameSubmit">提交</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -60,50 +104,85 @@
     data () {
       return {
         tableData: [],
-        text: '',
-        tags: []
+        tags: [],
+        playerVisible: false,
+        gameVisible: false,
+        playData: { name: '', team: '' },
+        gameDate: { score: '', rebound: '', assist: '' }
       }
     },
     mounted () {
       this.getText()
     },
     methods: {
-      formatter(row, column) {
-        console.log(row)
-        let averageScore = 0
-        for (let i = 0; i < row.data.length; i++) {
-          averageScore += row.data[i].score
-        }
-        averageScore = averageScore/row.data.length
-        return averageScore;
-      },
-      submitText() {
-        axios.post('http://localhost:3000/add', qs.stringify({
-          name: this.text,
-          id: this.createId(this.tags)
-        })).then(res => {
-          if (res.data.code == 200) {
-            this.text = ''
-            this.getText()
+      formatterScore(row, column) {
+        if (row.data) {
+          let averageScore = 0
+          for (let i = 0; i < row.data.length; i++) {
+            averageScore += Number(row.data[i].score)
           }
-        })
+          averageScore = averageScore/row.data.length
+          return averageScore.toFixed(2);
+        }
+        return ''
+      },
+      formatterRebound(row, column) {
+        if (row.data) {
+          let averageRebound = 0
+          for (let i = 0; i < row.data.length; i++) {
+            averageRebound += Number(row.data[i].rebound)
+          }
+          averageRebound = averageRebound/row.data.length
+          return averageRebound.toFixed(2);
+        }
+        return ''
+      },
+      formatterAssist(row, column) {
+        if (row.data) {
+          let averageAssist = 0
+          for (let i = 0; i < row.data.length; i++) {
+            averageAssist += Number(row.data[i].assist)
+          }
+          averageAssist = averageAssist/row.data.length
+          return averageAssist.toFixed(2);
+        }
+        return ''
+      },
+      formatterSession(row, column) {
+        if (row.data) {
+          return row.data.length
+        }
+        return 0
       },
       getText(){
         axios.get('http://localhost:3000/').then(res => {
-          this.tags = res.data
-          console.log(this.tags)
+          this.tableData = res.data
+          this.tableData.forEach((item, index) => {
+            if (item.data) {
+              this.tableData[index].data = (this.tableData[index].data instanceof Array) ? this.tableData[index].data : [this.tableData[index].data]
+            }
+          })
         })
       },
-      handleClose(index){
-        console.log(index)
+      deleteClick(row) {
+        console.log(row.id)
         axios.post('http://localhost:3000/delete', qs.stringify({
-          index,
+          id: row.id
         })).then(res => {
           if (res.data.code == 200) {
             this.getText()
           }
         })
       },
+      // handleClose(index){
+      //   axios.post('http://localhost:3000/delete', qs.stringify({
+      //     index,
+      //   })).then(res => {
+      //     if (res.data.code == 200) {
+      //       this.getText()
+      //     }
+      //   })
+      // },
       createId (list) {
         let id = Math.ceil(Math.random()*100)
         if (checkId(id, list)) {
@@ -121,7 +200,40 @@
           return true
         }
       },
-      
+      onSubmit () {
+        // console.log(this.playData)
+        let params = {
+          name: this.playData.name,
+          team: this.playData.team,
+          id: this.createId(this.tableData)
+        }
+        axios.post('http://localhost:3000/add', qs.stringify(params)).then(res => {
+          if (res.data.code == 200) {
+            this.getText()
+          }
+        })
+        this.playerVisible = false
+        this.playData.name = ''
+        this.playData.team = ''
+      },
+      handleClick(row){
+        // console.log(row)
+        this.gameVisible = true
+        this.operateId = row.id
+      },
+      onGameSubmit(){
+        // console.log(this.gameDate)
+        axios.post('http://localhost:3000/addGame', qs.stringify({
+          id: this.operateId,
+          data: JSON.stringify(this.gameDate)
+        })).then(res => {
+          this.gameVisible = false
+          this.gameDate.score = ''
+          this.gameDate.rebound = ''
+          this.gameDate.assist = ''
+          this.getText()
+        })
+      }
     }
   }
 </script>

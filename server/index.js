@@ -4,7 +4,7 @@ const qs = require('qs');
 
 let successCode = JSON.stringify({ code: 200 })
 
-// fs.writeFile('./demo.txt', '1222', err => {
+// fs.writeFile('./player.txt', '1222', err => {
 //   if (err) {
 //     throw err
 //   }
@@ -17,13 +17,13 @@ let successCode = JSON.stringify({ code: 200 })
 //   { name: 'D', duty: '开发人员', id: '004' },
 //   { name: 'E', duty: '开发人员', id: '005' },
 // ]
-// fs.appendFile('./demo.txt', JSON.stringify(text), 'utf-8',  err => {
+// fs.appendFile('./player.txt', JSON.stringify(text), 'utf-8',  err => {
 //   if (err) {
 //     throw err
 //   }
 // })
 
-// fs.readFile('./demo.txt', 'utf-8', (err, data) => {
+// fs.readFile('./player.txt', 'utf-8', (err, data) => {
 //   if (err) {
 //     throw err
 //   } else {
@@ -31,7 +31,7 @@ let successCode = JSON.stringify({ code: 200 })
 //   }
 // })
 
-// const read = fs.createReadStream('./demo.txt', 'utf-8')
+// const read = fs.createReadStream('./player.txt', 'utf-8')
 // let str = ''
 // let count = 0
 
@@ -45,7 +45,9 @@ let successCode = JSON.stringify({ code: 200 })
 //   console.log(count)
 // })
 let items = []
-
+// 上证50, 沪深300
+// 中证500
+// 创业板综指, 创业板指数, 创业板50
 http.createServer((req, res) => {
   // 设置跨域的域名，* 代表允许任意域名跨域
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -66,7 +68,7 @@ http.createServer((req, res) => {
       })
       if (req.url == '/add') {
         req.on('end', () => {
-          fs.appendFile('./demo.txt', item+',', 'utf-8', err => {
+          fs.appendFile('./player.txt', item+',', 'utf-8', err => {
             if (err) {
               throw err
             }
@@ -76,25 +78,43 @@ http.createServer((req, res) => {
         })
       } else if (req.url == '/delete') {
         req.on('end', () => {
-          let index = qs.parse(item).index
-          readText().then(data => {
-            let textData = data.slice(0, data.length - 1).split(',').map(item => {
-              return qs.parse(item)
+          let deldteId = qs.parse(item).id
+          console.log(deldteId)
+          readText('./player.txt').then(data => {
+            let textData = data.slice(0, data.length - 1).split(',').filter(item => {
+              // console.log(qs.parse(item))
+              
+              return qs.parse(item).id != deldteId
             })
-            textData.splice(index, 1)
-            let _textData = ''
-            textData.forEach(item => {
-              return _textData += `name=` + item.name + '&id=' + item.id + ','
-            })
-            fs.writeFile('./demo.txt', _textData, 'utf-8', err => {
-              if (err) {
-                throw err
-              }
-            })
+            // console.log(textData.join(','))
+            writeText('./player.txt', textData.join(',').length?textData.join(',')+',':'')
           })
+          readText('./playerData.txt').then(data => {
+            console.log(data)
+            let gameData = data.slice(0, data.length - 1).split(',').filter(item => {
+              return qs.parse(item).id != deldteId
+            })
+            console.log(gameData)
+            writeText('./playerData.txt', gameData.join(',').length?gameData.join(',')+',':'')
+          })
+          // readText().then(data => {
+          //   let textData = data.slice(0, data.length - 1).split(',').map(item => {
+          //     return qs.parse(item)
+          //   })
+          //   textData.splice(index, 1)
+          //   let _textData = ''
+          //   textData.forEach(item => {
+          //     return _textData += `name=` + item.name + '&id=' + item.id + ','
+          //   })
+          //   fs.writeFile('./player.txt', _textData, 'utf-8', err => {
+          //     if (err) {
+          //       throw err
+          //     }
+          //   })
+          // })
           res.write(successCode)
           res.end()
-          // fs.readFile('./demo.txt', 'utf-8', (err, data) => {
+          // fs.readFile('./player.txt', 'utf-8', (err, data) => {
           //   if (err) {
           //     throw err
           //   }
@@ -105,11 +125,24 @@ http.createServer((req, res) => {
           //   demo.splice()
           // })
         })
+      } else if (req.url == '/addGame') {
+        req.on('end', () => {
+          fs.readFile('./playerData.txt', 'utf-8', (err, data) => {
+              fs.appendFile('./playerData.txt', item+',', 'utf-8', err => {
+                if (err) {
+                  throw err
+                }
+              })
+          })
+          res.write(successCode)
+          res.end()
+        })
       }
       break;
     case 'GET':
-      let read = fs.createReadStream('./demo.txt')
+      let read = fs.createReadStream('./player.txt')
       let textData = ''
+      let gameData = fs.readFileSync('./playerData.txt', 'utf-8')
       read.on('data', (chunk) => {
         textData += chunk
       })
@@ -118,6 +151,23 @@ http.createServer((req, res) => {
           textData = textData.slice(0, textData.length - 1).split(',').map(item => {
             return qs.parse(item)
           })
+          gameData = gameData.slice(0, gameData.length - 1).split(',').map(item => {
+            return qs.parse(item)
+          })
+          console.log(textData)
+          console.log(gameData)
+          textData.forEach((item1, index1) => {
+            gameData.forEach((item2, index2) => {
+              if (item1.id == item2.id) {
+                if (textData[index1].data) {
+                  textData[index1].data.push(JSON.parse(item2.data))
+                } else {
+                  textData[index1].data = [JSON.parse(item2.data)]
+                }
+              }
+            })
+          })
+
         } else {
           textData = []
         }
@@ -129,13 +179,24 @@ http.createServer((req, res) => {
   console.log('server is starting')
 })
 
-function readText () {
+function readText (path) {
   return new Promise((resolve, reject) => {
-    fs.readFile('./demo.txt', 'utf-8', (err, data) => {
+    fs.readFile(path, 'utf-8', (err, data) => {
       if (err) {
         throw err
       }
       resolve(data)
+    })
+  })
+}
+
+function writeText (path, content) {
+  return new Promise((resolve, reject) => {
+    fs.writeFile(path, content, 'utf-8', err => {
+      if (err) {
+        throw err
+      }
+      resolve('done')
     })
   })
 }
