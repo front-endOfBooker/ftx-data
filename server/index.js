@@ -1,6 +1,7 @@
 const fs = require('fs');
 const http = require('http');
 const qs = require('qs');
+const url = require('url');
 
 let successCode = JSON.stringify({ code: 200 })
 
@@ -140,6 +141,7 @@ http.createServer((req, res) => {
       }
       break;
     case 'GET':
+      let queryDate = qs.parse(url.parse(req.url).query).date
       let read = fs.createReadStream('./player.txt')
       let textData = ''
       let gameData = fs.readFileSync('./playerData.txt', 'utf-8')
@@ -154,8 +156,16 @@ http.createServer((req, res) => {
           gameData = gameData.slice(0, gameData.length - 1).split(',').map(item => {
             return qs.parse(item)
           })
-          console.log(textData)
+
+          // 如果有查询的月份
+          if (queryDate) {
+            gameData = gameData.filter(item => {
+              return JSON.parse(item.data).time.indexOf(queryDate) > -1
+            })
+          }
+
           console.log(gameData)
+
           textData.forEach((item1, index1) => {
             gameData.forEach((item2, index2) => {
               if (item1.id == item2.id) {

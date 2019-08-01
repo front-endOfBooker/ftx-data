@@ -1,7 +1,7 @@
 <template>
   <div class="demo">
     <el-col :span="2">
-      <el-button type="primary" size="mini" @click="playerVisible = true">添加</el-button>
+      <el-button style="margin-bottom: 10px;" type="primary" size="mini" @click="playerVisible = true">添加</el-button>
     </el-col>
     <el-table
       :data="tableData"
@@ -14,7 +14,9 @@
         <template slot-scope="props">
           <el-form label-position="left" inline class="demo-table-expand">
             <el-form-item label="">
-              <p v-for="(item, index) in props.row.data" :key="index*Math.random()">{{ item.score }}p {{ item.rebound }}reb {{ item.assist }}ass</p>
+              <p v-for="(item, index) in props.row.data" :key="index*Math.random()">
+                {{ item.time }}&nbsp;&nbsp; {{ item.score }}p {{ item.rebound }}reb {{ item.assist }}ass
+              </p>
             </el-form-item>
           </el-form>
         </template>
@@ -77,15 +79,22 @@
     </el-dialog>
 
     <el-dialog title="add gameData" :visible.sync="gameVisible">
-      <el-form :inline="true" :model="gameDate" class="demo-form-inline">
+      <el-form :inline="true" :model="gameData" class="demo-form-inline">
+        <el-form-item label="time">
+          <el-date-picker
+            v-model="gameData.time"
+            type="date"
+            placeholder="选择日期">
+          </el-date-picker>
+        </el-form-item>
         <el-form-item label="score">
-          <el-input v-model="gameDate.score" placeholder="score"></el-input>
+          <el-input v-model="gameData.score" placeholder="score"></el-input>
         </el-form-item>
         <el-form-item label="rebound">
-          <el-input v-model="gameDate.rebound" placeholder="rebound"></el-input>
+          <el-input v-model="gameData.rebound" placeholder="rebound"></el-input>
         </el-form-item>
         <el-form-item label="assist">
-          <el-input v-model="gameDate.assist" placeholder="assist"></el-input>
+          <el-input v-model="gameData.assist" placeholder="assist"></el-input>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="onGameSubmit">提交</el-button>
@@ -108,7 +117,7 @@
         playerVisible: false,
         gameVisible: false,
         playData: { name: '', team: '' },
-        gameDate: { score: '', rebound: '', assist: '' }
+        gameData: { time: '', score: '', rebound: '', assist: '' },
       }
     },
     mounted () {
@@ -155,7 +164,7 @@
         return 0
       },
       getText(){
-        axios.get('http://localhost:3000/').then(res => {
+        axios.get('http://localhost:3000/data?date=2019/7').then(res => {
           this.tableData = res.data
           this.tableData.forEach((item, index) => {
             if (item.data) {
@@ -222,15 +231,18 @@
         this.operateId = row.id
       },
       onGameSubmit(){
-        // console.log(this.gameDate)
+        // console.log(this.gameData)
+        let date = new Date(this.gameData.time)
+        this.gameData.time = date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate()
         axios.post('http://localhost:3000/addGame', qs.stringify({
           id: this.operateId,
-          data: JSON.stringify(this.gameDate)
+          data: JSON.stringify(this.gameData)
         })).then(res => {
           this.gameVisible = false
-          this.gameDate.score = ''
-          this.gameDate.rebound = ''
-          this.gameDate.assist = ''
+          this.gameData.score = ''
+          this.gameData.rebound = ''
+          this.gameData.assist = ''
+          this.gameData.time = ''
           this.getText()
         })
       }
