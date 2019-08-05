@@ -145,6 +145,10 @@ http.createServer((req, res) => {
       let read = fs.createReadStream('./player.txt')
       let textData = ''
       let gameData = fs.readFileSync('./playerData.txt', 'utf-8')
+
+      console.log(req.url)
+      console.log(queryDate)
+
       read.on('data', (chunk) => {
         textData += chunk
       })
@@ -164,7 +168,6 @@ http.createServer((req, res) => {
             })
           }
 
-          console.log(gameData)
 
           textData.forEach((item1, index1) => {
             gameData.forEach((item2, index2) => {

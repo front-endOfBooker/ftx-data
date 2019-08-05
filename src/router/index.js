@@ -3,7 +3,8 @@ import Router from 'vue-router'
 const Login = () => import('@/components/Login') 
 const Index = () => import('@/components/Index')
 
-const demo = () => import('@/components/views/demo')
+const dataTable = () => import('@/components/views/dataTable')
+const dataShow = () => import('@/components/views/dataShow')
 
 Vue.use(Router)
 
@@ -18,12 +19,17 @@ export default new Router({
       path: '/',
       name: 'Index',
       component: Index,
-      redirect: 'demo',
+      redirect: 'dataTable',
       children: [
         {
-          path: 'demo',
-          name: 'demo',
-          component: demo
+          path: 'dataTable',
+          name: 'dataTable',
+          component: dataTable
+        },
+        {
+          path: 'dataShow',
+          name: 'dataShow',
+          component: dataShow
         }
       ]
     }

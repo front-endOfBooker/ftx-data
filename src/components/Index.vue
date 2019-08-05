@@ -24,9 +24,13 @@
           <el-menu>
               
            
-            <el-menu-item index="1" @click="checkItem(2)">
+            <el-menu-item index="1" @click="checkItem(1)">
               <i class="el-icon-s-data"></i>
               <span>发布列表</span>
+            </el-menu-item>
+            <el-menu-item index="2" @click="checkItem(2)">
+              <i class="el-icon-data-board"></i>
+              <span>操作历史</span>
             </el-menu-item>
             <!-- <el-menu-item index="2" @click="checkItem(1)">
               <i class="el-icon-circle-plus-outline"></i>
@@ -78,7 +82,12 @@ export default {
     },
     methods: {
       checkItem(type) {
-  
+        switch(type){
+          case 1: this.$router.push({name: 'dataTable'})
+          break;
+          case 2: this.$router.push({name: 'dataShow'})
+          break;
+        }
       }
     },
   };

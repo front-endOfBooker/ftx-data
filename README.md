@@ -11,6 +11,8 @@ npm install
 npm run dev
 ##打包
 npm run build
+# 模拟服务端启动
+npm run server
 ```
 
 ## package.json
@@ -19,4 +21,6 @@ npm run build
 element-ui ui框架
 vue全家桶+axios
 nprogress 进度条
+echarts 图表
+node 模拟后台
 ```
