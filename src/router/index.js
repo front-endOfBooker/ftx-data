@@ -5,6 +5,7 @@ const Index = () => import('@/components/Index')
 
 const dataTable = () => import('@/components/views/dataTable')
 const dataShow = () => import('@/components/views/dataShow')
+const chart = () => import('@/components/views/chart')
 
 Vue.use(Router)
 
@@ -30,7 +31,12 @@ export default new Router({
           path: 'dataShow',
           name: 'dataShow',
           component: dataShow
-        }
+        },
+        {
+            path: 'chart',
+            name: 'chart',
+            component: chart
+          }
       ]
     }
   ]
